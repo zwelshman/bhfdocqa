@@ -8,12 +8,21 @@ st.set_page_config(page_title="BHF Docs Q&A", page_icon="🫀")
 st.title("🫀 BHF Documentation Q&A")
 st.write("Ask questions about BHF Data Science Centre documentation")
 
-# API Key input
-api_key = st.text_input("Anthropic API Key", type="password", placeholder="sk-ant-...")
+# API Key - try secrets first, then user input
+api_key = None
 
-if not api_key:
-    st.warning("Please enter your Anthropic API key to continue")
-    st.stop()
+# Try to get API key from secrets
+try:
+    api_key = st.secrets["ANTHROPIC_API_KEY"]
+    st.success("✅ API key loaded from secrets")
+except:
+    # Fall back to manual input
+    api_key = st.text_input("Anthropic API Key", type="password", placeholder="sk-ant-...")
+    
+    if not api_key:
+        st.warning("Please enter your Anthropic API key to continue")
+        st.info("💡 **For Streamlit Cloud:** Add your API key to secrets as `ANTHROPIC_API_KEY`")
+        st.stop()
 
 # Function to scrape entire BHF docs website
 @st.cache_data(ttl=3600)  # Cache for 1 hour
@@ -142,7 +151,7 @@ Question: {question}
 Please provide a helpful answer based on the documentation and clearly state which page(s) you found the information on. If the information isn't available in the documentation, say so clearly."""
 
             message = client.messages.create(
-                model="claude-opus-4-1",
+                model="claude-sonnet-4-20250514",
                 max_tokens=1000,
                 messages=[{"role": "user", "content": prompt}]
             )
