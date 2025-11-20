@@ -25,7 +25,7 @@ except ImportError:
         "min_content_length": 100,
         "max_content_length": 10000,
     }
-    ANTHROPIC = {"model": "claude-sonnet-4-20250514", "max_tokens": 1000, "max_context_sources": 3}
+    ANTHROPIC = {"model": "claude-sonnet-4-20250514", "max_tokens": 2000, "max_context_sources": 3}
     SEARCH = {"title_weight": 3, "content_weight": 1, "min_word_length": 3, "max_results": 3}
     UI = {"page_title": "BHF DSC Documentation Q&A", "page_icon": "🫀", "layout": "wide"}
     CONTACT = {"team_email": "bhfdsc_hds@hdruk.ac.uk"}
