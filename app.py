@@ -152,7 +152,7 @@ Please provide a helpful answer based on the documentation and clearly state whi
 
             message = client.messages.create(
                 model="claude-opus-4-1",
-                max_tokens=1000,
+                max_tokens=10000,
                 messages=[{"role": "user", "content": prompt}]
             )
             
