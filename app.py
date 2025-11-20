@@ -72,7 +72,7 @@ Question: {question}
 Please provide a helpful answer based on the documentation. If the information isn't available in the documentation, say so clearly."""
 
             message = client.messages.create(
-                model="claude-sonnet-4",
+                model="claude-sonnet-4-5",
                 max_tokens=1000,
                 messages=[{"role": "user", "content": prompt}]
             )
