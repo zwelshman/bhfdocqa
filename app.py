@@ -24,13 +24,17 @@ def scrape_bhf_docs():
     
     def scrape_page(url):
         if url in visited_urls:
-            return ""
+            return None
         visited_urls.add(url)
         
         try:
             response = requests.get(url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Get page title
+            title = soup.find('title')
+            page_title = title.get_text().strip() if title else url.split('/')[-1]
             
             # Get main content
             main_content = soup.find('main') or soup.find('body')
@@ -41,25 +45,23 @@ def scrape_bhf_docs():
                 text = main_content.get_text()
                 # Clean up whitespace
                 text = ' '.join(text.split())
-                return text
-            return ""
-        except Exception as e:
-            st.warning(f"Could not scrape {url}: {e}")
-            return ""
+                return {"title": page_title, "content": text, "url": url}
+            return None
+        except Exception:
+            return None
     
     try:
         # Get main page first
         progress_bar = st.progress(0)
-        st.write("Scraping main page...")
         
         response = requests.get(base_url, timeout=10)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         
         # Add main page content
-        main_content = scrape_page(base_url)
-        if main_content:
-            all_content.append(main_content)
+        main_page = scrape_page(base_url)
+        if main_page:
+            all_content.append(main_page)
         
         # Find all internal links
         links = soup.find_all('a', href=True)
@@ -82,33 +84,33 @@ def scrape_bhf_docs():
         # Remove duplicates
         internal_links = list(set(internal_links))
         
-        st.write(f"Found {len(internal_links)} pages to scrape...")
-        
         # Scrape each page
         for i, url in enumerate(internal_links):
             progress_bar.progress((i + 1) / len(internal_links))
-            st.write(f"Scraping: {url}")
             
-            page_content = scrape_page(url)
-            if page_content:
-                all_content.append(page_content)
+            page_data = scrape_page(url)
+            if page_data:
+                all_content.append(page_data)
         
         progress_bar.empty()
-        return " ".join(all_content)
+        
+        # Return both structured data and combined text
+        total_chars = sum(len(page["content"]) for page in all_content)
+        return all_content, total_chars, len(all_content)
         
     except Exception as e:
         st.error(f"Failed to scrape documentation: {e}")
-        return ""
+        return [], 0, 0
 
 # Load documentation
 with st.spinner("Scraping entire BHF documentation website..."):
-    docs_content = scrape_bhf_docs()
+    docs_pages, total_chars, total_pages = scrape_bhf_docs()
 
-if not docs_content:
+if not docs_pages:
     st.error("Could not load documentation content")
     st.stop()
 
-st.success(f"Successfully scraped entire BHF documentation website! Loaded {len(docs_content):,} characters total.")
+st.success(f"Successfully scraped {total_pages} pages with {total_chars:,} total characters")
 
 # Question input
 question = st.text_area(
@@ -122,14 +124,22 @@ if st.button("Ask Question", type="primary") and question:
         try:
             client = anthropic.Anthropic(api_key=api_key)
             
+            # Build context with page sources
+            context = ""
+            for page in docs_pages:
+                context += f"\n\n--- PAGE: {page['title']} ---\n"
+                context += page['content']
+            
             prompt = f"""Based on the BHF Data Science Centre documentation below, please answer the user's question.
 
+When providing your answer, please cite which specific page(s) you got the information from by mentioning the page title(s).
+
 Documentation:
-{docs_content}
+{context}
 
 Question: {question}
 
-Please provide a helpful answer based on the documentation. If the information isn't available in the documentation, say so clearly."""
+Please provide a helpful answer based on the documentation and clearly state which page(s) you found the information on. If the information isn't available in the documentation, say so clearly."""
 
             message = client.messages.create(
                 model="claude-opus-4-1",
