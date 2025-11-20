@@ -151,7 +151,7 @@ Question: {question}
 Please provide a helpful answer based on the documentation and clearly state which page(s) you found the information on. If the information isn't available in the documentation, say so clearly."""
 
             message = client.messages.create(
-                model="claude-opus-4-1",
+                model="claude-haiku-4-5",
                 max_tokens=10000,
                 messages=[{"role": "user", "content": prompt}]
             )
