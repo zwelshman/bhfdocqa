@@ -74,14 +74,26 @@ st.markdown("""
         margin: 1rem 0;
         border-radius: 12px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        color: #000000 !important;
+    }
+    .chat-message * {
+        color: #000000 !important;
     }
     .user-message {
         background: linear-gradient(135deg, #e3f2fd, #bbdefb);
         border-left: 4px solid #2196f3;
+        color: #000000 !important;
+    }
+    .user-message * {
+        color: #000000 !important;
     }
     .assistant-message {
         background: linear-gradient(135deg, #f3e5f5, #e1bee7);
         border-left: 4px solid #9c27b0;
+        color: #000000 !important;
+    }
+    .assistant-message * {
+        color: #000000 !important;
     }
     .sidebar-content {
         background-color: #f8f9fa;
@@ -116,6 +128,10 @@ st.markdown("""
         padding: 1rem;
         border-radius: 8px;
         margin: 1rem 0;
+        color: #000000 !important;
+    }
+    .content-stats * {
+        color: #000000 !important;
     }
     .question-suggestions {
         background: #f8f9fa;
@@ -123,6 +139,10 @@ st.markdown("""
         padding: 1rem;
         margin: 1rem 0;
         border-left: 4px solid #17a2b8;
+        color: #000000 !important;
+    }
+    .question-suggestions * {
+        color: #000000 !important;
     }
 </style>
 """, unsafe_allow_html=True)
